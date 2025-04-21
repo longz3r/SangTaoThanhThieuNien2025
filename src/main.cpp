@@ -5,15 +5,24 @@
 #include "Adafruit_GFX.h"
 #include <WiFi.h>
 #include <WebServer.h>
+#include <Preferences.h>
 
 // Config
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 const char* ssid = "VNPT VIET HA 4G";
 const char* pass = "08092008";
 
+const char* apSSID = "ESP32-Setup";
+const char* apPASS = "12345678";
+
+
+// Flags
 bool pin1Status = false;
 bool pin2Status = false;
+bool wifiConfigured = false;
+bool shouldStartAP = false;
 
+Preferences preferences;
 WebServer server(80);
 
 const unsigned char tick[] PROGMEM = {
@@ -30,6 +39,52 @@ const unsigned char tick[] PROGMEM = {
 const unsigned char cross [] PROGMEM = {
   0x81, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x81
 };
+
+void startAPMode() {
+  WiFi.softAP(apSSID, apPASS);
+  delay(100); // Let AP stabilize
+
+  Serial.println("AP Mode Started. Connect to:");
+  Serial.println(WiFi.softAPIP());
+
+  server.on("/", HTTP_GET, []() {
+    int n = WiFi.scanNetworks();
+    String options = "";
+
+    if (n == 0) {
+      options = "<option disabled>No networks found</option>";
+    } else {
+      for (int i = 0; i < n; ++i) {
+        options += "<option value='" + WiFi.SSID(i) + "'>" + WiFi.SSID(i) + " (" + String(WiFi.RSSI(i)) + " dBm)</option>";
+      }
+    }
+
+    String page = R"rawliteral(
+      <h2>Select WiFi Network</h2>
+      <form action="/save">
+        SSID: <select name="ssid">)rawliteral" + options + R"rawliteral(</select><br>
+        Password: <input name="pass" type="password"><br><br>
+        <input type="submit" value="Save and Connect">
+      </form>
+    )rawliteral";
+
+    server.send(200, "text/html", page);
+  });
+
+  server.on("/save", HTTP_GET, []() {
+    String ssid = server.arg("ssid");
+    String pass = server.arg("pass");
+
+    preferences.putString("ssid", ssid);
+    preferences.putString("pass", pass);
+
+    server.send(200, "text/html", "Saved! Rebooting...");
+    delay(1000);
+    ESP.restart();
+  });
+
+  server.begin();
+}
 
 
 String generateHTML() {
@@ -92,17 +147,17 @@ void handleToggle() {
     int pin = server.arg("pin").toInt();
     if (pin == 1) {
       pin1Status = !pin1Status;
-      digitalWrite(2, pin1Status ? HIGH : LOW);
+      digitalWrite(12, pin1Status ? LOW : HIGH);
     } else if (pin == 2) {
       pin2Status = !pin2Status;
-      digitalWrite(4, pin2Status ? HIGH : LOW);
+      digitalWrite(13, pin2Status ? LOW : HIGH);
     }
   }
   server.send(200, "text/html", generateHTML());
 }
 
 
-void displayStatus() {
+void displayStatus(float sensor1percent, float sensor2percent) {
   display.clearDisplay();
   display.setCursor(0, 0);
   wl_status_t status = WiFi.status();
@@ -111,16 +166,16 @@ void displayStatus() {
       display.println("Da ket noi WiFi");
       break;
     case WL_NO_SSID_AVAIL:
-      display.println("No SSID Available");
+      display.println("Khong tim thay WiFi");
       break;
     case WL_CONNECT_FAILED:
       display.println("Ket noi that bai");
       break;
     case WL_IDLE_STATUS:
-      display.println("Idle");
+      display.println("Trang thai cho");
       break;
     case WL_DISCONNECTED:
-      display.println("Mat ket noi");
+      display.println("Mat ket noi WiFi");
       break;
     default:
       display.println("Khong xac dinh");
@@ -130,8 +185,8 @@ void displayStatus() {
   display.printf("IP: %s\n", WiFi.localIP().toString().c_str());
   // display.printf("Pump 1: %s\n", pin1Status ? "ON" : "OFF");
   // display.printf("Pump 2: %s\n", pin2Status ? "ON" : "OFF");
-  display.println("Pump 1");
-  display.println("Pump 2");
+  display.println("Bom 1");
+  display.println("Bom 2");
   if (pin1Status) {
     display.drawBitmap(40, 24, tick, 8, 8, WHITE);
   } else {
@@ -142,7 +197,12 @@ void displayStatus() {
   } else {
     display.drawBitmap(40, 32, cross, 8, 8, WHITE);
   }
+
+  display.printf("Sensor 1: %.1f%%%\n", sensor1percent);
+  display.printf("Sensor 2: %.1f%%%", sensor2percent);
+
   display.display();
+  delay(50);
 }
 
 void setup() {
@@ -155,6 +215,11 @@ void setup() {
   // Display intro
   display.display();
   delay(200);
+  pinMode(12, OUTPUT);
+  pinMode(13, OUTPUT);
+
+  digitalWrite(12, HIGH);
+  digitalWrite(13, HIGH);
 
   // Wifi connection
   display.clearDisplay();
@@ -163,7 +228,27 @@ void setup() {
   display.display();
   WiFi.begin(ssid, pass);
 
-  while (WiFi.status() != WL_CONNECTED) {
+  // if (ssid != "") {
+  //   // Try STA mode
+  //   Serial.println("Connecting to saved WiFi...");
+  //   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
+  //     Serial.println("Failed. Switching to AP mode.");
+  //     shouldStartAP = true;
+  //   } else {
+  //     Serial.println("Connected!");
+  //     Serial.println(WiFi.localIP());
+  //   }
+  // } else {
+  //   shouldStartAP = true;
+  // }
+
+  // if (shouldStartAP) {
+  //   startAPMode();
+  // }
+
+  int startTime = millis();
+
+  while (WiFi.status() != WL_CONNECTED && millis() - startTime < 5000) {
     delay(100);
     display.print(".");
     display.display();
@@ -176,6 +261,20 @@ void setup() {
 }
 
 void loop() {
-  displayStatus();
+  int sensor1mV = constrain(analogReadMilliVolts(32), 200, 2200);
+  float sensor1percent = map(sensor1mV, 2200, 200, 0, 1000);
+
+  int sensor2mV = constrain(analogReadMilliVolts(33), 2000, 3000);
+  float sensor2percent = map(sensor2mV, 2000, 3000, 0, 1000);
+
+  displayStatus(sensor1percent / 10, sensor2percent / 10);
+
+  if (sensor1percent / 10 < 40) {
+    digitalWrite(12, LOW);
+    pin1Status = true;
+  } else {
+    digitalWrite(12, HIGH);
+    pin1Status = false;
+  }
   server.handleClient();
 }
