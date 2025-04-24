@@ -39,42 +39,19 @@ void startup() {
     }
   }
 
-  if (!wifiConfigured) {
+  // if (!wifiConfigured) {
     AP_SSID = config.getString("AP_SSID");
     AP_PASS = config.getString("AP_PASS");
     
-
     WiFi.softAP(AP_SSID, AP_PASS);
-  }
+  // }
 
   server.on("/", handleRoot);
     server.on("/toggle", handleToggle);
-    server.on("/sensorData", HTTP_GET, []() {
-      String json = "{\"temperature\": " + String(rtc.getTemperature()) + 
-            ", \"humidity\": {\"sensor1\": " + String(sensor1percent) + 
-            ", \"sensor2\": " + String(sensor2percent) + "}}";
-      server.send(200, "application/json", json);
-    });
+    server.on("/sensorData", HTTP_GET, handleSensorData);
     
     server.on("/saveWiFiConfig", HTTP_POST, []() {
-      String ssid = server.arg("ssid");
-      String password = server.arg("password");
       
-      if (ssid.length() == 0) {
-        server.send(400, "text/plain", "SSID cannot be empty");
-        return;
-      }
-      
-      // Save to preferences
-      config.putString("ssid", ssid);
-      config.putString("pass", password);
-      
-      server.send(200, "text/plain", "Đã lưu thông tin WiFi");
-      displayMessage("Dang khoi dong lai", 1000);
-      
-      // Delay to allow response to be sent
-      delay(1000);
-      ESP.restart();
     });
     server.begin();
 }

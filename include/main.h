@@ -58,5 +58,10 @@ void firstTimeStartup();
 void startup();
 float readTemperature();
 Sensor readHumidity();
+void checkScheduler();
+void updateDisplay();
+void checkWiFiStatus();
+void handleSensorData();
+void handleSaveWiFiConfig();
 
 #endif // MAIN_H

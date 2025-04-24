@@ -84,8 +84,8 @@ void displayStatusWithoutWiFi(float sensor1percent, float sensor2percent) {
   } else {
     display.drawBitmap(40, 40, cross, 8, 8, WHITE);
   }
-  display.printf("Do am: %.1f%%%\n", readHumidity());
-  display.printf("Nhiet do: %.2f%%  C", readTemperature());
+  display.printf("Do am: %.1f%% - %.1f%%\n", sensor1percent, sensor2percent) ;
+  display.printf("Nhiet do: %.2f%  CC", rtc.getTemperature());
   display.drawBitmap(128, 56, degree, 8, 8, WHITE);
   display.display();
   delay(50);
@@ -97,4 +97,22 @@ void displayMessage(String message, int time) {
   display.print(message);
   display.display();
   delay(time);
+}
+
+void updateDisplay() {
+  now = rtc.now();
+
+  int sensor1mV = constrain(analogReadMilliVolts(32), 200, 2200);
+  sensor1percent = map(sensor1mV, 2200, 200, 0, 1000);
+  sensor1percent = sensor1percent / 10;
+
+  int sensor2mV = constrain(analogReadMilliVolts(33), 2000, 3000);
+  sensor2percent = map(sensor2mV, 2000, 3000, 0, 1000);
+  sensor2percent = sensor2percent / 10;
+
+  if (wifiConfigured) {
+    displayStatusWithWiFi(sensor1percent, sensor2percent);
+  } else {
+    displayStatusWithoutWiFi(sensor1percent, sensor2percent);
+  }
 }
