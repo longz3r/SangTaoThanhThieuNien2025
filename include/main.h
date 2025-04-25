@@ -13,18 +13,14 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include "RTClib.h"
-
-struct Sensor {
-    float humidity1;
-    float humidity2;    
-};
+#include <vector>
 
 // Extern declarations for global variables
 extern Adafruit_SSD1306 display;
 extern WiFiUDP ntpUDP;
 extern NTPClient timeClient;
-extern bool pin1Status;
-extern bool pin2Status;
+extern bool pump1Status;
+extern bool pump2Status;
 extern bool wifiConfigured;
 extern bool shouldStartAP;
 extern Preferences config;
@@ -39,6 +35,7 @@ extern String pass;
 extern DateTime now;
 extern char daysOfTheWeek[7][12];
 extern float* humidity;
+extern bool automaticWateringStatus;
 
 // Bitmap declarations
 extern const unsigned char tick[];
@@ -57,11 +54,64 @@ void loop();
 void firstTimeStartup();
 void startup();
 float readTemperature();
-Sensor readHumidity();
 void checkScheduler();
 void updateDisplay();
 void checkWiFiStatus();
-void handleSensorData();
+void handleStatus();
 void handleSaveWiFiConfig();
+void handleSaveAPConfig();
+void automaticWatering();
+void syncTime();
+void pumpStatusUpdate();
+bool addConditionalSchedule(
+    uint8_t pumpNumber,
+    uint8_t hour, 
+    uint8_t minute, 
+    void (*callback)(bool, uint8_t), 
+    String desc,
+    float sensor1Limit, 
+    float sensor2Limit,
+    bool bothSensorsRequired,
+    bool enabled
+  );
+  bool addTimedSchedule(
+    uint8_t pumpNumber,
+    uint8_t hour, 
+    uint8_t minute,
+    void (*callback)(bool, uint8_t), 
+    String desc,
+    unsigned long durationMinutes,
+    bool enabled
+  );
+void pumpControl(bool state, uint8_t pumpNumber);
+
+enum ScheduleType {
+    CONDITIONAL,  // Active until sensor thresholds met
+    TIMED         // Active for specific duration
+  };
+  
+  // Schedule structure
+  struct Schedule {
+    uint8_t pumpNumber;
+    ScheduleType type;
+    uint8_t hour;
+    uint8_t minute;
+    void (*callback)(bool, uint8_t);  // Function to call with state (true=start, false=end)
+    String description;
+    bool enabled;
+    
+    // Conditional schedule parameters
+    float sensor1Threshold;
+    float sensor2Threshold;
+    bool requireBothSensors;
+    
+    // Timed schedule parameters
+    unsigned long durationSeconds;  // Duration for timed schedules
+    
+    // Runtime state
+    bool isActive;
+    unsigned long activeSince;
+  };
+    extern std::vector<Schedule> schedules;
 
 #endif // MAIN_H

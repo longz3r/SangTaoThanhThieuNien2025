@@ -1,11 +1,11 @@
 #include <main.h>
 
 String generateHTML() {
-    String color1 = pin1Status ? "green" : "red";
-    String label1 = pin1Status ? "Bật" : "Tắt";
+    String color1 = pump1Status ? "green" : "red";
+    String label1 = pump1Status ? "Bật" : "Tắt";
   
-    String color2 = pin2Status ? "green" : "red";
-    String label2 = pin2Status ? "Bật" : "Tắt";
+    String color2 = pump2Status ? "green" : "red";
+    String label2 = pump2Status ? "Bật" : "Tắt";
   
     String html = R"rawliteral(
       <!DOCTYPE html>
@@ -65,6 +65,18 @@ String generateHTML() {
             <button onclick="saveWiFiConfig()">Lưu và khởi động lại</button>
           </div>
         </div>
+
+        <div class="ap-config">
+          <h2>Cài đặt điểm truy cập WiFi (Access Point)</h2>
+          <p>Dùng để truy cập cài đặt của mạch khi mất kết nối WiFi</p>
+          <p>Tên Access Point hiện tại: <span id="currentSSID">)rawliteral" + String(AP_SSID) + R"rawliteral(</span></p>
+          <p>Mật khẩu Access Point hiện tại: <span id="currentPass">)rawliteral" + String(AP_PASS) + R"rawliteral(</span></p>
+          <div id="wifiNetworks">
+            <input type="text" id="AP_SSID" placeholder="Tên Access Point">
+            <input type="password" id="AP_PASS" placeholder="Mật khẩu Access Point">
+            <button onclick="saveAPConfig()">Lưu và khởi động lại</button>
+          </div>
+        </div>
   
         <script>
           function toggleGPIO(pin) {
@@ -73,13 +85,13 @@ String generateHTML() {
               .then(data => {
                 // Update button 1
                 const btn1 = document.getElementById('btn1');
-                btn1.style.backgroundColor = data.pin1Status ? "green" : "red";
-                btn1.textContent = "Bơm 1 - " + (data.pin1Status ? "Bật" : "Tắt");
+                btn1.style.backgroundColor = data.pump1Status ? "green" : "red";
+                btn1.textContent = "Bơm 1 - " + (data.pump1Status ? "Bật" : "Tắt");
                 
                 // Update button 2
                 const btn2 = document.getElementById('btn2');
-                btn2.style.backgroundColor = data.pin2Status ? "green" : "red";
-                btn2.textContent = "Bơm 2 - " + (data.pin2Status ? "Bật" : "Tắt");
+                btn2.style.backgroundColor = data.pump2Status ? "green" : "red";
+                btn2.textContent = "Bơm 2 - " + (data.pump2Status ? "Bật" : "Tắt");
                 
                 })
                 .catch(error => {
@@ -89,14 +101,23 @@ String generateHTML() {
           }
           
           // Auto-refresh sensor data every 2 seconds
-          function refreshSensorData() {
-            fetch('/sensorData')
+          function refreshStatusData() {
+            fetch('/status')
               .then(response => response.json())
               .then(data => {
                 document.getElementById('temperature').textContent = data.temperature;
                 document.getElementById('humidity1').textContent = data.humidity.sensor1;
                 document.getElementById('humidity2').textContent = data.humidity.sensor2;
-                // Update other sensor values similarly
+
+                // Update button 1
+                const btn1 = document.getElementById('btn1');
+                btn1.style.backgroundColor = data.pump1Status ? "green" : "red";
+                btn1.textContent = "Bơm 1 - " + (data.pump1Status ? "Bật" : "Tắt");
+                
+                // Update button 2
+                const btn2 = document.getElementById('btn2');
+                btn2.style.backgroundColor = data.pump2Status ? "green" : "red";
+                btn2.textContent = "Bơm 2 - " + (data.pump2Status ? "Bật" : "Tắt");
               });
           }
           
@@ -117,10 +138,28 @@ String generateHTML() {
               setTimeout(() => { window.location.reload(); }, 2000);
             });
           }
+
+          function saveAPConfig() {
+            const ssid = document.getElementById('AP_SSID').value;
+            const password = document.getElementById('AP_PASS').value;
+            
+            fetch('/saveAPConfig', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: 'ssid=' + encodeURIComponent(ssid) + '&password=' + encodeURIComponent(password)
+            })
+            .then(response => response.text())
+            .then(data => {
+              alert(data);
+              setTimeout(() => { window.location.reload(); }, 2000);
+            });
+          }
           
           // Refresh immediately and then every 2 seconds
-          refreshSensorData();
-          setInterval(refreshSensorData, 2000);
+          refreshStatusData();
+          setInterval(refreshStatusData, 2000);
         </script>
       </body>
       </html>

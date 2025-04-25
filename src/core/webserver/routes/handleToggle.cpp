@@ -6,17 +6,15 @@ void handleToggle() {
     
       // Toggle the appropriate pin
       if (pin == 1) {
-          pin1Status = !pin1Status;
-          digitalWrite(12, pin1Status ? LOW : HIGH);
+          pump1Status = !pump1Status;
       } else if (pin == 2) {
-          pin2Status = !pin2Status;
-          digitalWrite(13, pin2Status ? LOW : HIGH);
+          pump2Status = !pump2Status;
       }
       
       // Return JSON response with current states
       String json = "{";
-      json += "\"pin1Status\":" + String(pin1Status ? "true" : "false") + ",";
-      json += "\"pin2Status\":" + String(pin2Status ? "true" : "false");
+      json += "\"pump1Status\":" + String(pump1Status ? "true" : "false") + ",";
+      json += "\"pump2Status\":" + String(pump2Status ? "true" : "false");
       json += "}";
       
       server.send(200, "application/json", json);

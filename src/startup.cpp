@@ -26,8 +26,8 @@ void startup() {
     WiFi.begin(config.getString("ssid"), config.getString("pass"));
 
     int startTime = millis();
-    while (WiFi.status() != WL_CONNECTED && millis() - startTime < 5000) {
-      delay(100);
+    while (WiFi.status() != WL_CONNECTED && millis() - startTime < 10000) {
+      delay(200);
       display.print(".");
       display.display();
     }
@@ -35,23 +35,20 @@ void startup() {
     if (WiFi.status() != WL_CONNECTED) {
       displayMessage("Ko the ket noi WiFi", 1500);
     } else {
+      syncTime();
       wifiConfigured = true;
     }
   }
 
-  // if (!wifiConfigured) {
-    AP_SSID = config.getString("AP_SSID");
-    AP_PASS = config.getString("AP_PASS");
+  AP_SSID = config.getString("AP_SSID");
+  AP_PASS = config.getString("AP_PASS");
     
-    WiFi.softAP(AP_SSID, AP_PASS);
-  // }
+  WiFi.softAP(AP_SSID, AP_PASS);
 
   server.on("/", handleRoot);
-    server.on("/toggle", handleToggle);
-    server.on("/sensorData", HTTP_GET, handleSensorData);
-    
-    server.on("/saveWiFiConfig", HTTP_POST, []() {
-      
-    });
-    server.begin();
+  server.on("/toggle", handleToggle);
+  server.on("/status", HTTP_GET, handleStatus);
+  server.on("/saveWiFiConfig", HTTP_POST, handleSaveWiFiConfig);
+  server.on("/saveAPConfig", HTTP_POST, handleSaveAPConfig);
+  server.begin();
 }

@@ -3,6 +3,27 @@
 void displayStatusWithWiFi(float sensor1percent, float sensor2percent) {
     display.clearDisplay();
     display.setCursor(0, 0);
+
+    // Dong 1 - ngay thang nam - tgian
+    display.print(daysOfTheWeek[now.dayOfTheWeek()]);
+    display.print(" - ");
+    if(now.day() < 10) display.print('0');
+    display.print(now.day(), DEC);
+    display.print('/');
+    // if(now.month() < 10) display.print('0');
+    display.print(now.month(), DEC);
+    display.print(" - ");
+    if(now.hour() < 10) display.print('0');
+    display.print(now.hour(), DEC);
+    display.print(':');
+    if(now.minute() < 10) display.print('0');
+    display.print(now.minute(), DEC);
+    display.print(':');
+    if(now.second() < 10) display.print('0');
+    display.print(now.second(), DEC);
+
+    display.setCursor(0, 8);
+    // Dong 2 - Trang thai WiFi
     wl_status_t status = WiFi.status();
     switch (status) {
       case WL_CONNECTED:
@@ -25,41 +46,26 @@ void displayStatusWithWiFi(float sensor1percent, float sensor2percent) {
         break;
     }
 
-    display.print(daysOfTheWeek[now.dayOfTheWeek()]);
-    display.print(" - ");
-    if(now.day() < 10) display.print('0');
-    display.print(now.day(), DEC);
-    display.print('/');
-    // if(now.month() < 10) display.print('0');
-    display.print(now.month(), DEC);
-    display.print(" - ");
-    if(now.hour() < 10) display.print('0');
-    display.print(now.hour(), DEC);
-    display.print(':');
-    if(now.minute() < 10) display.print('0');
-    display.print(now.minute(), DEC);
-    display.print(':');
-    if(now.second() < 10) display.print('0');
-    display.print(now.second(), DEC);
-
     display.setCursor(0, 16);
+    // Dong 3 - Dia chi IP
     display.printf("IP: %s\n", WiFi.localIP().toString().c_str());
-    display.println("Bom 1");
-    display.println("Bom 2");
-    if (pin1Status) {
-      display.drawBitmap(40, 24, tick, 8, 8, WHITE);
+
+    // Dong 4 - Trang thai bom
+    display.println("Bom 1   - Bom 2");
+    if (pump1Status) {
+      display.drawBitmap(32, 24, tick, 8, 8, WHITE);
     } else {
-      display.drawBitmap(40, 24, cross, 8, 8, WHITE);
+      display.drawBitmap(32, 24, cross, 8, 8, WHITE);
     }
-    if (pin2Status) {
-      display.drawBitmap(40, 32, tick, 8, 8, WHITE);
+    if (pump2Status) {
+      display.drawBitmap(92, 24, tick, 8, 8, WHITE);
     } else {
-      display.drawBitmap(40, 32, cross, 8, 8, WHITE);
+      display.drawBitmap(92, 24, cross, 8, 8, WHITE);
     }
   
     display.printf("Do am: %.1f%% - %.1f%%\n", sensor1percent, sensor2percent) ;
     display.printf("Nhiet do: %.2f%  CC", rtc.getTemperature());
-    display.drawBitmap(90, 48, degree, 8, 8, WHITE);
+    display.drawBitmap(90, 40, degree, 8, 8, WHITE);
 
     display.display();
     delay(50);
@@ -74,12 +80,12 @@ void displayStatusWithoutWiFi(float sensor1percent, float sensor2percent) {
   display.printf("IP: %s\n", WiFi.softAPIP().toString().c_str());
   display.println("Bom 1");
   display.println("Bom 2");
-  if (pin1Status) {
+  if (pump1Status) {
     display.drawBitmap(40, 32, tick, 8, 8, WHITE);
   } else {
     display.drawBitmap(40, 32, cross, 8, 8, WHITE);
   }
-  if (pin2Status) {
+  if (pump2Status) {
     display.drawBitmap(40, 40, tick, 8, 8, WHITE);
   } else {
     display.drawBitmap(40, 40, cross, 8, 8, WHITE);
