@@ -49,7 +49,7 @@ void displayStatusWithWiFi(float sensor1percent, float sensor2percent) {
     display.setCursor(0, 16);
     // Dong 3 - Dia chi IP
     display.printf("IP: %s\n", WiFi.localIP().toString().c_str());
-
+    display.setCursor(0, 24);
     // Dong 4 - Trang thai bom
     display.println("Bom 1   - Bom 2");
     if (pump1Status) {
@@ -75,8 +75,11 @@ void displayStatusWithoutWiFi(float sensor1percent, float sensor2percent) {
   display.clearDisplay();
   display.setCursor(0, 0);
   display.println("Dang phat WiFi");
+  display.setCursor(0, 8);
   display.printf("Ten: %s\n", AP_SSID);
+  display.setCursor(0, 16);
   display.printf("MK: %s\n", AP_PASS);
+  display.setCursor(0, 24);
   display.printf("IP: %s\n", WiFi.softAPIP().toString().c_str());
   display.println("Bom 1");
   display.println("Bom 2");

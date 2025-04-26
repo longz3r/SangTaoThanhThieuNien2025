@@ -60,6 +60,7 @@ String generateHTML() {
         </div>
 
         <h2>Cài đặt ngưỡng cảm biến & chế độ tưới tự động</h2>
+        <h3>Bơm sẽ được kích hoạt khi giá trị cảm biến thấp hơn ngưỡng dưới và ngưng kích hoạt khi giá trị cảm biến lớn hơn ngưỡng trên</h3>
 
         <form id="thresholdForm">
           <h3>Cảm biến 1 (Bơm 1)</h3>
@@ -101,7 +102,7 @@ String generateHTML() {
           <p>Tên Access Point hiện tại: <span id="currentSSID">)rawliteral" + String(AP_SSID) + R"rawliteral(</span></p>
           <p>Mật khẩu Access Point hiện tại: <span id="currentPass">)rawliteral" + String(AP_PASS) + R"rawliteral(</span></p>
           <div id="wifiNetworks">
-            <input type="text" id="AP_SSID" placeholder="Tên Access Point">
+            <input type="text" id="AP_SSID" placeholder="Tên Access Point (không dấu, không khoảng trắng)">
             <input type="password" id="AP_PASS" placeholder="Mật khẩu Access Point">
             <button onclick="saveAPConfig()">Lưu và khởi động lại</button>
           </div>

@@ -28,6 +28,7 @@ Task tPumpStatusUpdate(100, TASK_FOREVER, &pumpStatusUpdate);
 Task tScheduler(5000, TASK_FOREVER, &checkScheduler); // Every 5s
 Task tCheckWiFiStatus (5000, TASK_FOREVER, &checkWiFiStatus); // Every 5s
 Task tAutomaticWatering (5000, TASK_FOREVER, &automaticWatering); // Every 5s
+Task tCheckButtonPressed (100, TASK_FOREVER, &checkButtonPressed); // Every 5s
 
 void setup() {
   config.begin("config", false);
@@ -47,6 +48,8 @@ void setup() {
 
   pinMode(12, OUTPUT);
   pinMode(13, OUTPUT);
+  pinMode(4, INPUT_PULLUP);
+  pinMode(2, OUTPUT);
 
   digitalWrite(12, HIGH);
   digitalWrite(13, HIGH);
@@ -60,6 +63,7 @@ void setup() {
   runner.addTask(tCheckWiFiStatus);
   runner.addTask(tAutomaticWatering);
   runner.addTask(tPumpStatusUpdate);
+  runner.addTask(tCheckButtonPressed);
 
   // Enable tasks
   tDisplay.enable();
@@ -67,26 +71,7 @@ void setup() {
   tCheckWiFiStatus.enable();
   tAutomaticWatering.enableDelayed(5000);
   tPumpStatusUpdate.enable();
-
-  // addConditionalSchedule(
-  //   2,
-  //   21, 46,                     // 8:00 AM
-  //   pumpControl,               // Callback
-  //   "Morning watering",        // Description
-  //   50, 20.0,                 // Sensor1 threshold (humidity), sensor2 unused
-  //   false,                     // Don't require both sensors
-  //   true                       // Enabled
-  // );
-  
-  // // Add a timed schedule (lights on for 4 hours)
-  // addTimedSchedule(
-  //   3,
-  //   21, 47,                     // 6:00 PM
-  //   pumpControl,              // Callback
-  //   "Evening lights",          // Description
-  //   30,                    // 4 hours in minutes
-  //   true                       // Enabled
-  // );
+  tCheckButtonPressed.enableDelayed(3000);
 
   startup();
 }

@@ -71,6 +71,7 @@ void handleAddSchedule();
 void handleResetData();
 void handleGetThresholds();
 void handleSaveThresholds();
+void checkButtonPressed();
 bool addConditionalSchedule(
     uint8_t pumpNumber,
     uint8_t hour, 
