@@ -61,25 +61,25 @@ void setup() {
   tAutomaticWatering.enableDelayed(5000);
   tPumpStatusUpdate.enable();
 
-  addConditionalSchedule(
-    2,
-    21, 46,                     // 8:00 AM
-    pumpControl,               // Callback
-    "Morning watering",        // Description
-    50, 20.0,                 // Sensor1 threshold (humidity), sensor2 unused
-    false,                     // Don't require both sensors
-    true                       // Enabled
-  );
+  // addConditionalSchedule(
+  //   2,
+  //   21, 46,                     // 8:00 AM
+  //   pumpControl,               // Callback
+  //   "Morning watering",        // Description
+  //   50, 20.0,                 // Sensor1 threshold (humidity), sensor2 unused
+  //   false,                     // Don't require both sensors
+  //   true                       // Enabled
+  // );
   
-  // Add a timed schedule (lights on for 4 hours)
-  addTimedSchedule(
-    3,
-    21, 47,                     // 6:00 PM
-    pumpControl,              // Callback
-    "Evening lights",          // Description
-    30,                    // 4 hours in minutes
-    true                       // Enabled
-  );
+  // // Add a timed schedule (lights on for 4 hours)
+  // addTimedSchedule(
+  //   3,
+  //   21, 47,                     // 6:00 PM
+  //   pumpControl,              // Callback
+  //   "Evening lights",          // Description
+  //   30,                    // 4 hours in minutes
+  //   true                       // Enabled
+  // );
 
   startup();
 }

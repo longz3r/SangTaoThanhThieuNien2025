@@ -63,6 +63,10 @@ void handleSaveAPConfig();
 void automaticWatering();
 void syncTime();
 void pumpStatusUpdate();
+void handleSchedulePage();
+void handleDeleteSchedule();
+void handleAddSchedule();
+void handleResetData();
 bool addConditionalSchedule(
     uint8_t pumpNumber,
     uint8_t hour, 
@@ -112,6 +116,24 @@ enum ScheduleType {
     bool isActive;
     unsigned long activeSince;
   };
-    extern std::vector<Schedule> schedules;
+
+  struct ScheduleStorage {
+    uint8_t pumpNumber;
+    uint8_t type;              // Save ScheduleType as uint8_t
+    uint8_t hour;
+    uint8_t minute;
+    char description[50];      // Fixed-length char array instead of String
+    bool enabled;
+    float sensor1Threshold;
+    float sensor2Threshold;
+    bool requireBothSensors;
+    unsigned long durationSeconds;
+  };
+
+ScheduleStorage fromSchedule(const Schedule& s);  
+extern std::vector<Schedule> schedules;
+std::vector<Schedule> loadStoredSchedules();
+void saveSchedule(std::vector<Schedule> schedules);
+
 
 #endif // MAIN_H

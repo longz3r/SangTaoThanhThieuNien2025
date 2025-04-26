@@ -77,6 +77,9 @@ String generateHTML() {
             <button onclick="saveAPConfig()">Lưu và khởi động lại</button>
           </div>
         </div>
+
+        <button onclick="resetData()">Xoá toàn bộ dữ liệu (thông tin WiFI, AP, lịch trình,...)</button>
+        <a href="/lichtrinh"><button>Quản lý lịch trình</button></a>
   
         <script>
           function toggleGPIO(pin) {
@@ -132,6 +135,15 @@ String generateHTML() {
               },
               body: 'ssid=' + encodeURIComponent(ssid) + '&password=' + encodeURIComponent(password)
             })
+            .then(response => response.text())
+            .then(data => {
+              alert(data);
+              setTimeout(() => { window.location.reload(); }, 2000);
+            });
+          }
+
+          function resetData() {
+            fetch('/resetData')
             .then(response => response.text())
             .then(data => {
               alert(data);

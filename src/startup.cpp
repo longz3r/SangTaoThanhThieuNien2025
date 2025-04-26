@@ -9,6 +9,7 @@ void startup() {
   // Adafruit splash screen
   display.display();
   firstTimeStartup();
+  schedules = loadStoredSchedules();
   delay(200);
 
   if (!rtc.begin()) {
@@ -50,5 +51,9 @@ void startup() {
   server.on("/status", HTTP_GET, handleStatus);
   server.on("/saveWiFiConfig", HTTP_POST, handleSaveWiFiConfig);
   server.on("/saveAPConfig", HTTP_POST, handleSaveAPConfig);
+  server.on("/lichtrinh", HTTP_GET, handleSchedulePage);
+  server.on("/deleteSchedule", HTTP_GET, handleDeleteSchedule);
+  server.on("/addSchedule", HTTP_POST, handleAddSchedule);
+  server.on("/resetData", HTTP_GET, handleResetData);
   server.begin();
 }
