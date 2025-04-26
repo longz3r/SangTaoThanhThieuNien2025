@@ -9,11 +9,11 @@ void firstTimeStartup() {
       6,
       30,
       pumpControl,
-      "Tuoi nuoc buoi sang",
+      "Tưới nước buổi sáng",
       true,
       50,
       60,
-      true,
+      false,
       0,  // duration not used
       true,
       0
@@ -27,7 +27,7 @@ void firstTimeStartup() {
       17,
       15,
       pumpControl,
-      "Tuoi nuoc buoi chieu",
+      "Tưới nước buổi chiều",
       true,
       0,
       0,

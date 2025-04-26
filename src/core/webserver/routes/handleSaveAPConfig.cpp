@@ -4,8 +4,6 @@ void handleSaveAPConfig() {
     String ssid = server.arg("ssid");
     String password = server.arg("password");
     
-    Serial.println(ssid);
-    Serial.println(password);
     if (ssid.length() == 0 || password.length() < 8) {
         server.send(400, "text/plain", "Tên Access Point không thể để trống");
         return;

@@ -1,12 +1,32 @@
 #include "main.h"
 
+String formatDuration(unsigned long totalSeconds) {
+  unsigned long hours = totalSeconds / 3600;
+  unsigned long minutes = (totalSeconds % 3600) / 60;
+  unsigned long seconds = totalSeconds % 60;
+
+  String result = "";
+
+  if (hours > 0) {
+    result += String(hours) + " giờ ";
+  }
+  if (minutes > 0) {
+    result += String(minutes) + " phút ";
+  }
+  if (seconds > 0 || result == "") {
+    result += String(seconds) + " giây";
+  }
+
+  return result;
+}
+
 void handleSchedulePage() {
     String html = R"rawliteral(
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="UTF-8">
-          <title>Lịch Trình</title>
+          <title>Quản lý lịch trình</title>
           <style>
             body { font-family: Arial; padding: 20px; }
             table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 8px; }
@@ -48,7 +68,8 @@ void handleSchedulePage() {
                 minute: document.getElementById("minute").value,
                 desc: document.getElementById("desc").value,
                 pump: pump,
-                enabled: document.getElementById("enabled").checked ? "on" : ""
+                // enabled: document.getElementById("enabled").checked ? "on" : "",
+                enabled: "on"
                 };
 
                 if (data.type === "timed") {
@@ -56,7 +77,7 @@ void handleSchedulePage() {
                 } else {
                 data.s1 = document.getElementById("s1").value;
                 data.s2 = document.getElementById("s2").value;
-                data.both = document.getElementById("both").checked ? "on" : "";
+                data.both = (document.querySelector('input[name="sensorCondition"]:checked').value === "AND") ? "on" : "";
                 }
 
                 const formBody = new URLSearchParams(data).toString();
@@ -70,7 +91,7 @@ void handleSchedulePage() {
             </script>
         </head>
         <body>
-          <h2>Lịch Trình</h2>
+          <h2>Quản lý lịch trình</h2>
           <a href="/"><button>Quay lại trang chủ</button></a>
           <button onclick="refreshSchedules()">Làm mới</button>
           <table>
@@ -79,7 +100,12 @@ void handleSchedulePage() {
                 <th>Tên</th>
                 <th>Loại</th>
                 <th>Thời gian bắt đầu</th>
-                <th>Trạng thái</th>
+                <th>Bơm sử dụng</th>
+                <th>Thời lượng tưới</th>
+                <!-- <th>Trạng thái</th> -->
+                <th>Ngưỡng cảm biến 1</th>
+                <th>Ngưỡng cảm biến 2</th>
+                <th>Hoặc/Và</th>
                 <th>Thao tác</th>
             </tr>
       )rawliteral";
@@ -88,9 +114,43 @@ void handleSchedulePage() {
         const auto& s = schedules[i];
         html += "<tr><td>" + String(i) + "</td>";
         html += "<td>" + s.description + "</td>";
-        html += "<td>" + String(s.type == ScheduleType::TIMED ? "Hẹn giờ" : "Điều kiện") + "</td>";
+        html += "<td>" + String(s.type == ScheduleType::TIMED ? "Hẹn giờ" : "Theo cảm biến") + "</td>";
         html += "<td>" + String(s.hour) + ":" + String(s.minute) + "</td>";
-        html += "<td>" + String(s.enabled ? "Bật" : "Tắt") + "</td>";
+        String pumpName;
+        if (s.pumpNumber == 1) {
+            pumpName = "Bơm 1";
+        } else if (s.pumpNumber == 2) {
+            pumpName = "Bơm 2";
+        } else if (s.pumpNumber == 3) {
+            pumpName = "Bơm 1 và Bơm 2";
+        } else {
+            pumpName = "Không xác định";
+        }
+        html += "<td>" + pumpName + "</td>";
+
+        String duration;
+        if (s.durationSeconds == 0) {
+          duration = "X";
+        } else {
+          duration = formatDuration(s.durationSeconds);
+        }
+
+        html += "<td>" + duration + "</td>";
+        html += "<td>" + String(s.sensor1Threshold) + "</td>";
+        html += "<td>" + String(s.sensor2Threshold) + "</td>";
+
+        String condition;
+        if (s.type == ScheduleType::CONDITIONAL) {
+          if (s.requireBothSensors) {
+            condition = "Và";
+          } else {
+            condition = "Hoặc";
+          }
+        } else {
+          condition = "X";
+        }
+        html += "<td>" + condition + "</td>";
+        // html += "<td>" + String(s.enabled ? "Bật" : "Tắt") + "</td>";
         html += "<td><a href='/deleteSchedule?id=" + String(i) + "'>Xoá</a></td></tr>";
       }
     
@@ -103,32 +163,40 @@ void handleSchedulePage() {
                 <option value="timed">Hẹn giờ</option>
                 <option value="cond">Theo cảm biến</option>
             </select><br>
-
+            <label>Tên lịch trình:</label>
+            <input type="text" id="desc"><br>
             <label>Giờ:</label>
             <input type="number" id="hour" min="0" max="23" required><br>
             <label>Phút:</label>
             <input type="number" id="minute" min="0" max="59" required><br>
-            <label>Mô tả:</label>
-            <input type="text" id="desc"><br>
+            
 
-            <label>Chọn bơm:</label><br>
+            <label>Bơm sử dụng: </label>
             <input type="checkbox" id="pump1"> Bơm 1
             <input type="checkbox" id="pump2"> Bơm 2<br>
 
             <div id="timedFields">
-                <label>Thời lượng (phút):</label>
+                <label>Thời lượng (giây):</label>
                 <input type="number" id="duration"><br>
             </div>
 
             <div id="condFields" style="display:none;">
-                <label>Ngưỡng cảm biến 1:</label>
-                <input type="number" id="s1" step="0.01"><br>
-                <label>Ngưỡng cảm biến 2:</label>
-                <input type="number" id="s2" step="0.01"><br>
-                <label><input type="checkbox" id="both"> Cần cả 2 cảm biến</label><br>
+                <label>Dừng bơm khi:</label><br>
+
+                <label>Cảm biến 1 vượt ngưỡng:</label>
+                <input type="number" id="s1" step="0.01">%<br>
+
+                <input type="radio" id="andOption" name="sensorCondition" value="AND" checked>
+                <label for="andOption">Và (cả hai vượt ngưỡng)</label><br>
+
+                <input type="radio" id="orOption" name="sensorCondition" value="OR">
+                <label for="orOption">Hoặc (một trong hai vượt ngưỡng)</label><br>
+
+                <label>Cảm biến 2 vượt ngưỡng:</label>
+                <input type="number" id="s2" step="0.01">%<br>
             </div>
 
-            <label><input type="checkbox" id="enabled" checked> Bật</label><br>
+            <!-- <label><input type="checkbox" id="enabled" checked> Bật</label><br> -->
             <button type="submit">Thêm lịch</button>
             </form>
         </body></html>
@@ -172,7 +240,7 @@ void handleAddSchedule() {
         desc,
         s1,
         s2,
-        both,
+        server.arg("both") == "on",
         enabled
       );
       if (!success) {
@@ -195,6 +263,7 @@ void handleDeleteSchedule() {
         schedules.erase(schedules.begin() + index);
       }
     }
+    saveSchedule(schedules);
     server.sendHeader("Location", "/lichtrinh");
     server.send(303);
 }

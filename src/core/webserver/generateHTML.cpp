@@ -55,6 +55,10 @@ String generateHTML() {
         <button class="button" id="btn1" style="background-color: )rawliteral" + color1 + R"rawliteral(;") onclick="toggleGPIO(1)">Bơm 1 - )rawliteral" + label1 + R"rawliteral(</button>
         <button class="button" id="btn2" style="background-color: )rawliteral" + color2 + R"rawliteral(;") onclick="toggleGPIO(2)">Bơm 2 - )rawliteral" + label2 + R"rawliteral(</button>
 
+        <div>
+          <a href="/lichtrinh"><button>Quản lý lịch trình</button></a>
+        </div>
+
         <div class="wifi-config">
           <h2>Cài đặt WiFi</h2>
           <p>Tên WiFi hiện tại: <span id="currentSSID">)rawliteral" + String(ssid) + R"rawliteral(</span></p>
@@ -79,7 +83,6 @@ String generateHTML() {
         </div>
 
         <button onclick="resetData()">Xoá toàn bộ dữ liệu (thông tin WiFI, AP, lịch trình,...)</button>
-        <a href="/lichtrinh"><button>Quản lý lịch trình</button></a>
   
         <script>
           function toggleGPIO(pin) {
