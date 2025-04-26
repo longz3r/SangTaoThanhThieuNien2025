@@ -55,5 +55,7 @@ void startup() {
   server.on("/deleteSchedule", HTTP_GET, handleDeleteSchedule);
   server.on("/addSchedule", HTTP_POST, handleAddSchedule);
   server.on("/resetData", HTTP_GET, handleResetData);
+  server.on("/getThresholds", HTTP_GET, handleGetThresholds);
+  server.on("/saveThresholds", HTTP_POST, handleSaveThresholds);
   server.begin();
 }

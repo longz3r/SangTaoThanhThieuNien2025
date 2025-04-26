@@ -21,6 +21,7 @@ float* humidity;
 Scheduler runner;
 bool automaticWateringStatus;
 std::vector<Schedule> schedules;
+float sensor1Lower, sensor1Upper, sensor2Lower, sensor2Upper;
 
 Task tDisplay(100, TASK_FOREVER, &updateDisplay);
 Task tPumpStatusUpdate(100, TASK_FOREVER, &pumpStatusUpdate);
@@ -36,7 +37,13 @@ void setup() {
   display.setTextSize(1);
   display.setTextColor(WHITE);
   timeClient.setTimeOffset(7*3600); // GMT+7
-  automaticWateringStatus = config.getBool("AUTOMATIC_WATERING");
+
+  automaticWateringStatus = config.getBool("AUTO_WATER");
+  sensor1Lower = config.getFloat("sensor1Lower");
+  sensor1Upper = config.getFloat("sensor1Upper");
+  sensor2Lower = config.getFloat("sensor2Lower");
+  sensor2Upper = config.getFloat("sensor2Upper");
+
 
   pinMode(12, OUTPUT);
   pinMode(13, OUTPUT);

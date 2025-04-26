@@ -40,13 +40,18 @@ void firstTimeStartup() {
     firstTimeSchedule.push_back(newSchedule);
 
     saveSchedule(firstTimeSchedule);
-    config.putString("ssid", "VNPT VIET HA 4G");
-    config.putString("pass", "08092008");
+    config.putString("ssid", "CHUA CAI DAT");
+    config.putString("pass", "CHUA CAI DAT");
 
-    config.putString("AP_SSID", "ESP32");
+    config.putString("AP_SSID", "PlantWatering");
     config.putString("AP_PASS", "12345678");
 
-    config.putBool("AUTOMATIC_WATERING", false);
+    config.putBool("AUTO_WATER", false);
+    config.putFloat("sensor1Lower", 30);
+    config.putFloat("sensor1Upper", 50);
+    config.putFloat("sensor2Lower", 40);
+    config.putFloat("sensor2Upper", 70);
+
     config.putBool("initialized", true);
   }
 }

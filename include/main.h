@@ -14,6 +14,7 @@
 #include <WiFiUdp.h>
 #include "RTClib.h"
 #include <vector>
+#include <ArduinoJson.h>
 
 // Extern declarations for global variables
 extern Adafruit_SSD1306 display;
@@ -36,6 +37,7 @@ extern DateTime now;
 extern char daysOfTheWeek[7][12];
 extern float* humidity;
 extern bool automaticWateringStatus;
+extern float sensor1Lower, sensor1Upper, sensor2Lower, sensor2Upper;
 
 // Bitmap declarations
 extern const unsigned char tick[];
@@ -67,6 +69,8 @@ void handleSchedulePage();
 void handleDeleteSchedule();
 void handleAddSchedule();
 void handleResetData();
+void handleGetThresholds();
+void handleSaveThresholds();
 bool addConditionalSchedule(
     uint8_t pumpNumber,
     uint8_t hour, 

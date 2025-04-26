@@ -59,6 +59,31 @@ String generateHTML() {
           <a href="/lichtrinh"><button>Quản lý lịch trình</button></a>
         </div>
 
+        <h2>Cài đặt ngưỡng cảm biến & chế độ tưới tự động</h2>
+
+        <form id="thresholdForm">
+          <h3>Cảm biến 1 (Bơm 1)</h3>
+          <label>Ngưỡng dưới (%):</label>
+          <input type="number" id="sensor1Lower" min="0" max="100" step="0.01"><br>
+          <label>Ngưỡng trên (%):</label>
+          <input type="number" id="sensor1Upper" min="0" max="100" step="0.01"><br>
+
+          <h3>Cảm biến 2 (Bơm 2)</h3>
+          <label>Ngưỡng dưới (%):</label>
+          <input type="number" id="sensor2Lower" min="0" max="100" step="0.01"><br>
+          <label>Ngưỡng trên (%):</label>
+          <input type="number" id="sensor2Upper" min="0" max="100" step="0.01"><br>
+
+          <h3>Chế độ tưới tự động</h3>
+          <label>
+            <input type="checkbox" id="automaticWatering"> Bật tưới tự động
+          </label><br><br>
+
+          <button type="button" onclick="saveThresholds()">Lưu cài đặt</button>
+        </form>
+
+        <div id="saveStatus"></div>
+
         <div class="wifi-config">
           <h2>Cài đặt WiFi</h2>
           <p>Tên WiFi hiện tại: <span id="currentSSID">)rawliteral" + String(ssid) + R"rawliteral(</span></p>
@@ -175,6 +200,50 @@ String generateHTML() {
           // Refresh immediately and then every 2 seconds
           refreshStatusData();
           setInterval(refreshStatusData, 2000);
+
+          function saveThresholds() {
+            const data = {
+              sensor1Lower: parseFloat(document.getElementById("sensor1Lower").value),
+              sensor1Upper: parseFloat(document.getElementById("sensor1Upper").value),
+              sensor2Lower: parseFloat(document.getElementById("sensor2Lower").value),
+              sensor2Upper: parseFloat(document.getElementById("sensor2Upper").value),
+              automaticWatering: document.getElementById("automaticWatering").checked
+            };
+
+            fetch("/saveThresholds", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(data)
+            })
+            .then(response => {
+              if (response.ok) {
+                document.getElementById("saveStatus").innerText = "Đã lưu thành công!";
+              } else {
+                document.getElementById("saveStatus").innerText = "Lỗi khi lưu!";
+              }
+            })
+            .catch(error => {
+              console.error("Error saving thresholds:", error);
+              document.getElementById("saveStatus").innerText = "Lỗi kết nối!";
+            });
+          }
+
+          window.onload = function() {
+            fetch("/getThresholds")
+              .then(response => response.json())
+              .then(data => {
+                document.getElementById("sensor1Lower").value = data.sensor1Lower;
+                document.getElementById("sensor1Upper").value = data.sensor1Upper;
+                document.getElementById("sensor2Lower").value = data.sensor2Lower;
+                document.getElementById("sensor2Upper").value = data.sensor2Upper;
+                document.getElementById("automaticWatering").checked = data.automaticWatering;
+              })
+              .catch(error => {
+                console.error("Error loading thresholds:", error);
+              });
+          }
         </script>
       </body>
       </html>
