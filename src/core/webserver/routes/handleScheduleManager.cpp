@@ -104,8 +104,8 @@ void handleSchedulePage() {
                 <th>Thời lượng tưới</th>
                 <!-- <th>Trạng thái</th> -->
                 <th>Ngưỡng cảm biến 1</th>
-                <th>Ngưỡng cảm biến 2</th>
                 <th>Hoặc/Và</th>
+                <th>Ngưỡng cảm biến 2</th>
                 <th>Thao tác</th>
             </tr>
       )rawliteral";
@@ -137,8 +137,6 @@ void handleSchedulePage() {
 
         html += "<td>" + duration + "</td>";
         html += "<td>" + String(s.sensor1Threshold) + "</td>";
-        html += "<td>" + String(s.sensor2Threshold) + "</td>";
-
         String condition;
         if (s.type == ScheduleType::CONDITIONAL) {
           if (s.requireBothSensors) {
@@ -150,6 +148,7 @@ void handleSchedulePage() {
           condition = "X";
         }
         html += "<td>" + condition + "</td>";
+        html += "<td>" + String(s.sensor2Threshold) + "</td>";
         // html += "<td>" + String(s.enabled ? "Bật" : "Tắt") + "</td>";
         html += "<td><a href='/deleteSchedule?id=" + String(i) + "'>Xoá</a></td></tr>";
       }

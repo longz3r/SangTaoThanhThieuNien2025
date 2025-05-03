@@ -38,6 +38,7 @@ extern char daysOfTheWeek[7][12];
 extern float* humidity;
 extern bool automaticWateringStatus;
 extern float sensor1Lower, sensor1Upper, sensor2Lower, sensor2Upper;
+extern int lastButtonCheck1, lastButtonCheck2;
 
 // Bitmap declarations
 extern const unsigned char tick[];

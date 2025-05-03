@@ -22,6 +22,7 @@ Scheduler runner;
 bool automaticWateringStatus;
 std::vector<Schedule> schedules;
 float sensor1Lower, sensor1Upper, sensor2Lower, sensor2Upper;
+int lastButtonCheck1, lastButtonCheck2 = 0;
 
 Task tDisplay(100, TASK_FOREVER, &updateDisplay);
 Task tPumpStatusUpdate(100, TASK_FOREVER, &pumpStatusUpdate);
@@ -49,6 +50,8 @@ void setup() {
   pinMode(12, OUTPUT);
   pinMode(13, OUTPUT);
   pinMode(4, INPUT_PULLUP);
+  pinMode(16, INPUT_PULLUP);
+  pinMode(17, INPUT_PULLUP);
   pinMode(2, OUTPUT);
 
   digitalWrite(12, HIGH);
